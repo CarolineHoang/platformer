@@ -1,4 +1,4 @@
-import React, { Component, useState, useContext, useEffect } from 'react';
+import React, { Component, useState, useContext, useEffect, useRef } from 'react';
 import styled from "styled-components";
 import Avatar from './avatar.js';
 import "./styles.css";
@@ -37,9 +37,10 @@ const Ground = styled.div`
     bottom: calc(-100% + 2vw);
 `;
 
-const AvatarStyles = styled.div`
-    position: relative; 
-    bottom: calc(-100% + 0vw);
+const AvatarStyles = styled.svg`
+    /* position: relative; 
+    bottom: calc(-100% + 0vw); */
+    transform:  translate(${props => props.moveX}, ${props => props.moveY});
 `;
 
 
@@ -51,6 +52,7 @@ const AvatarStyles = styled.div`
 // var platform = document.getElementsByClassName("platform");
 
 var SpaceBar = " ";
+var RENDER_FPS = 30;
 
 // var xVar = 10;
 // var yVar = 200
@@ -99,18 +101,18 @@ var height = 500, //determines how many pixels away from the top of the screen i
 
 
 
-var worldData = {
-    "player": {
-      "x" : Math.floor(width / 2) - Math.floor(playerWidth / 2),
-      "y" : 8, //height - playerHeight
-      "fallingSpeed": 0,
-      "currentDir": null,
-      "jumpDisplacement": 1,
-      "playerFacing":"left"
-    },
-    // Stores the current held keys. Can be inspected.
-    "keysDown": []
-  }
+// var worldData = {
+//     "player": {
+//       "x" : Math.floor(width / 2) - Math.floor(playerWidth / 2),
+//       "y" : 8, //height - playerHeight
+//       "fallingSpeed": 30,
+//       "currentDir": null,
+//       "jumpDisplacement": 1,
+//       "playerFacing":"left"
+//     },
+//     // Stores the current held keys. Can be inspected.
+//     "keysDown": []
+//   }
 
 
 //   let update = () => {
@@ -120,21 +122,195 @@ var worldData = {
 //   }
 //   update();
 
+var worldData = {
+    "player": {
+      "x" : Math.floor(width / 2) - Math.floor(playerWidth / 2),
+      "y" : 8, //height - playerHeight
+      "fallingSpeed": 30,
+      "currentDir": null,
+      "jumpDisplacement": 1,
+      "playerFacing":"left",
+      "currentAnimation": "walkLeft"
+    },
+    // Stores the current held keys. Can be inspected.
+    "keysDown": ["sdf"]
+  }
 
 
 function Game() {//must be capitalized
-
+    const avatarRef = useRef(null);
+    const avatarImgRef = useRef(null);
     const [ x, setX] = useState(0);
     const [ y, setY] = useState(0);
+    const [currentDir, setCurrentDir] = useState("RIGHT");
+    const [ fallingSpeed , setFallingSpeed] = useState(0);
     const [keysDown, setKeysDown ] = useState([]);
 
-    useEffect(()=>{  //if key is down, add to array of active keys
+    useEffect(()=>{
+        window.addEventListener('keydown', handleKeyDown, false);
+        window.addEventListener('keyup', handleKeyUp, false);
+        setInterval((callback)=>{
+
+            moveAvatar();
+            //console\.log\(([^)]+)\)
+            //console\.log\(([^)]+)\)
+            worldData.player.y +=speed;
+            
+            if (isKeyDown("ArrowRight")){
+                //console\.log\(([^)]+)\)
+                worldData.player.x +=speed;
+                moveAvatar("RELOCATE_X", worldData.player.x, null)
+                worldData.player.currentDir = "RIGHT";
+                updateAnimation("walkRight");
+                // avatarRef.current.setAttribute("class", "walkRight" )
+                changeAnimation("walkRight");
+                // console.log("class: " + avatarRef.current.classList )
+                // avatarImgRef.current.classList = ""
+                // avatarImgRef.current.classList.add('walkRight');
+
+                
+                // avatarRef.current.classList.remove('pauseLeft');
+                // //console\.log\(([^)]+)\)
+                // avatarRef.current.className = "walkRight"; 
+                // setX(x + speed);
+                // currentDir = "RIGHT"; //registers that you moved right last time
+                // applySpriteChange();
+
+                // document.getElementById("playerAvatar").classList="";
+                // document.getElementById("playerAvatar").classList.add("walkRight");
+            }
+            else if (isKeyDown("ArrowLeft")){
+                //console\.log\(([^)]+)\)
+                worldData.player.x -=speed;
+                moveAvatar("RELOCATE_X", worldData.player.x, null)
+                worldData.player.currentDir = "LEFT";
+                addClass("hi");
+                // updateAnimation("walkLeft");
+                changeAnimation("walkLeft");
+            }
+            if (isKeyDown("ArrowUp")){
+                //console\.log\(([^)]+)\)
+                if(worldData.player.fallingSpeed>=0){
+                    worldData.player.fallingSpeed -=8;
+                }
+                moveAvatar("RELOCATE_Y", null , worldData.player.y);
+                // setX(x + speed);
+                // currentDir = "RIGHT"; //registers that you moved right last time
+                // applySpriteChange();
+
+                // document.getElementById("playerAvatar").classList="";
+                // document.getElementById("playerAvatar").classList.add("walkRight");
+            }
+
+            if (!isKeyDown("ArrowLeft") && !isKeyDown("ArrowRight") && !isKeyDown("ArrowUp" )) {
+                console.log ("WE SHOULD BE STANDING!!")
+                if (worldData.player.currentDir == "LEFT"){
+                    changeAnimation("pauseLeft");
+                }
+                else if ( worldData.player.currentDir == "RIGHT"){
+                    changeAnimation("pauseRight");
+                }
+            }
+
+
+
+            if (y>=height-basePlayerHeight){
+                //console\.log\(([^)]+)\)
+                worldData.player.fallingSpeed =0;
+                // setFallingSpeed(0)
+                moveAvatar("RELOCATE_Y", null, height-basePlayerHeight );
+            }
+            else{
+                // The player is falling
+                //console\.log\(([^)]+)\)
+                worldData.player.y += worldData.player.fallingSpeed;
+                worldData.player.fallingSpeed += 1;
+                moveAvatar("RELOCATE_Y", null , worldData.player.y);
+                // setY(y+fallingSpeed)
+                // setFallingSpeed(fallingSpeed+1)
+            }
+            // const fireKeyAction =(key, isDown)=>{
+            //     // Only trigger Arrow keys.
+    
+            //     // //console\.log\(([^)]+)\) + (parseInt(avatarRef.current.getAttribute("x"))+1) );
+            //     // avatarRef.current.setAttribute("x", (parseInt(avatarRef.current.getAttribute("x"))+1)    )
+            //     var keysDown = worldData.keysDown;
+            //     //console\.log\(([^)]+)\)
+            //     //console\.log\(([^)]+)\)
+            //     switch(key){
+            //         case "ArrowLeft":
+            //         case "ArrowRight":
+            //         case "ArrowUp":
+            //         case "ArrowDown":
+            //         case SpaceBar:
+            //             if (isDown) {
+            //                 // Only add the key if it's not already in the list.
+            //                 if (keysDown.indexOf(key) === -1) {
+            //                     keysDown.push(key);
+            //                 }
+            //             } else {
+            //                 keysDown.splice(keysDown.indexOf(key), 1);
+            //             };
+            //     }
+            // }
+            // const handleKeyDown = (e) => {
+            //     //console\.log\(([^)]+)\)
+            //     var key = e.key;
+            //     fireKeyAction(key, true)
+            // }
+            // const handleKeyUp = (e) => {
+            //     var key = e.key;
+            //     fireKeyAction(key, false)
+            // }
+            // window.addEventListener('keydown', handleKeyDown, false);
+            // window.addEventListener('keyup', handleKeyUp, false);
+
+            // don't forget to delisten to these two handlers
+            if (height - worldData.player.y <= playerHeight && worldData.player.fallingSpeed >= 0){
+                worldData.player.y = height - playerHeight;
+                worldData.player.fallingSpeed = 0;
+            } 
+            else {
+                // The player is falling
+                worldData.player.y += worldData.player.fallingSpeed;
+                worldData.player.fallingSpeed += .5;
+                // worldData.player.y += 1;
+              
+                if (worldData.player.currentDir === "left") {
+                    worldData.player.x -= worldData.player.jumpDisplacement;          //if you were heading left midair, keep heading left
+                    //worldData.player.x -= speed *.5;
+                    //worldData.player.currentDir = null;
+                }
+                if (worldData.player.currentDir === "right") {
+                  worldData.player.x += worldData.player.jumpDisplacement;
+                    //if you were heading right midair, keep heading right
+                    //worldData.player.x += speed *.5;
+                }  
+            }
+          
+
+        },30);
+    });
+
+
+        const isKeyDown = (keyName)=>{
+            //console\.log\(([^)]+)\)
+            //console\.log\(([^)]+)\)
+            // //console\.log\(([^)]+)\) + "Firse arr val:" + keysDown[0])
+            //console\.log\(([^)]+)\) + "Firse arr val:" + worldData.keysDown[0])
+            return worldData.keysDown.indexOf(keyName) !== -1
+        }   
+
+                    //if key is down, add to array of active keys
                      //if key is released, remove from active keys
         const fireKeyAction =(key, isDown)=>{
             // Only trigger Arrow keys.
+
+            // //console\.log\(([^)]+)\) + (parseInt(avatarRef.current.getAttribute("x"))+1) );
+            // avatarRef.current.setAttribute("x", (parseInt(avatarRef.current.getAttribute("x"))+1)    )
             var keysDown = worldData.keysDown;
-            console.log(keysDown)
-            console.log(key)
+            //console\.log\(([^)]+)\)
+            //console\.log\(([^)]+)\)
             switch(key){
                 case "ArrowLeft":
                 case "ArrowRight":
@@ -144,15 +320,18 @@ function Game() {//must be capitalized
                     if (isDown) {
                         // Only add the key if it's not already in the list.
                         if (keysDown.indexOf(key) === -1) {
-                            keysDown.push(key);
+                            //console\.log\(([^)]+)\)
+                            // //console\.log\(([^)]+)\)
+                            // //console\.log\(([^)]+)\)
+                            worldData.keysDown.push(key);
                         }
                     } else {
-                        keysDown.splice(keysDown.indexOf(key), 1);
+                        worldData.keysDown.splice(keysDown.indexOf(key), 1);
                     };
             }
         }
         const handleKeyDown = (e) => {
-            console.log("pressing!!")
+            //console\.log\(([^)]+)\)
             var key = e.key;
             fireKeyAction(key, true)
         }
@@ -160,8 +339,52 @@ function Game() {//must be capitalized
             var key = e.key;
             fireKeyAction(key, false)
         }
-        window.addEventListener('keydown', handleKeyDown, false);
-        window.addEventListener('keyup', handleKeyUp, false);
+        function addClass(c){
+            avatarRef.current.classList="";
+            avatarRef.current.classList.add("walkLeft");
+        }   
+        //don't forget to delisten to these two handlers
+    // useEffect(()=>{  //if key is down, add to array of active keys
+    //                  //if key is released, remove from active keys
+    //     const fireKeyAction =(key, isDown)=>{
+    //         // Only trigger Arrow keys.
+
+    //         // //console\.log\(([^)]+)\) + (parseInt(avatarRef.current.getAttribute("x"))+1) );
+    //         // avatarRef.current.setAttribute("x", (parseInt(avatarRef.current.getAttribute("x"))+1)    )
+    //         var keysDown = worldData.keysDown;
+    //         //console\.log\(([^)]+)\)
+    //         //console\.log\(([^)]+)\)
+    //         switch(key){
+    //             case "ArrowLeft":
+    //             case "ArrowRight":
+    //             case "ArrowUp":
+    //             case "ArrowDown":
+    //             case SpaceBar:
+    //                 if (isDown) {
+    //                     // Only add the key if it's not already in the list.
+    //                     if (keysDown.indexOf(key) === -1) {
+    //                         keysDown.push(key);
+    //                     }
+    //                 } else {
+    //                     keysDown.splice(keysDown.indexOf(key), 1);
+    //                 };
+    //         }
+    //     }
+    //     const handleKeyDown = (e) => {
+    //         //console\.log\(([^)]+)\)
+    //         var key = e.key;
+    //         fireKeyAction(key, true)
+    //     }
+    //     const handleKeyUp = (e) => {
+    //         var key = e.key;
+    //         fireKeyAction(key, false)
+    //     }
+    //     window.addEventListener('keydown', handleKeyDown, false);
+    //     window.addEventListener('keyup', handleKeyUp, false);
+    //     //don't forget to delisten to these two handlers
+    // });
+    useEffect(()=>{
+        avatarRef.current.setAttribute("y", 400  )
     });
     function getAvatarX(e){
         setX(e.target.value);
@@ -169,6 +392,68 @@ function Game() {//must be capitalized
     function getAvatarY(e){
         setY(e.target.value);
     } 
+    function moveAvatar(command, xCoord, yCoord){
+        // const avatarRef = useRef(null);
+        // if (command != "stop"){
+        //     avatarRef.current.setAttribute("x", x )
+        //     avatarRef.current.setAttribute("y", y )
+        // }
+        if (command == "RELOCATE_X"){
+            avatarRef.current.setAttribute("x", xCoord )
+        }
+        if (command == "RELOCATE_Y"){
+            avatarRef.current.setAttribute("y", yCoord )
+        }
+
+
+        // avatarRef.current.setAttribute("x", (parseInt(avatarRef.current.getAttribute("x"))+1)    )
+    }
+
+    function updateAnimation(animation){
+        worldData.player.currentAnimation = animation;
+    }
+
+    function animateAvatar(animation){
+        //console\.log\(([^)]+)\)
+        var ani = worldData.player.currentAnimation;
+        switch(ani){
+            case "pauseLeft":
+            case "pauseRight":
+            case "walkLeft":
+            case "walkRight":
+                return ani
+                break;
+            default:
+                return "pauseLeft"
+        }
+    }
+
+    function changeAnimation(animation){
+        switch(animation){
+            case "pauseLeft":
+            case "pauseRight":
+            case "walkLeft":
+            case "walkRight":
+                avatarImgRef.current.classList = "";
+                avatarImgRef.current.classList.add(animation);
+                break;
+            default:
+                return avatarImgRef.current.classList.add("pauseLeft");
+        }
+        
+    }
+    // function renderAvatar(){
+    //     render(return(
+
+    //     ))
+    // }
+
+
+    // moveAvatar("RELOCATE_Y", null, 400)
+    
+
+ 
+
     // constructor() {
     //   super();
       
@@ -189,13 +474,13 @@ function Game() {//must be capitalized
             <div class= "header">
                 <input value={x} onChange= {getAvatarX}></input>
                 <div>{x}</div>
-                <input value={y} onChange= {getAvatarY}></input>
+                <input value={worldData.player.y} onChange= {getAvatarY}></input>
                 <div>{keysDown}</div>
             </div>
 
-            <div id="walk-container">
+            {/* <div id="walk-container">
                 <div id="walk"></div>
-            </div>
+            </div> */}
 
             <div class= "game">
                 <svg id="screen">
@@ -205,11 +490,17 @@ function Game() {//must be capitalized
                     <!-- width!= viewbox to show that we "cut out the image to show with a width of only 40px" -->
                     <!-- height = viewbox becuase that is to the scale we originally set -->
                     <!-- xMinYMin = align to top right   |    slice= don't show whatever doesn't fit in the "view" defined by width and height    |  Note: it's confusingly named, but viewbox does not define the viewable so much as the whole thing, height and width is for what is viewable --> */}
-                    <svg id="player"  
-                    // x="500" y="200" 
+                    <AvatarStyles id="player"  
+                    // moveX={x ? 0 : x} moveY={500 ? 0 : 500} 
+                    ref={avatarRef}
+                    x="500" y="200" 
                     width="40px" height="63px" viewBox="0 0 320 63" preserveAspectRatio="xMinYMin slice">
-                        <image id="playerAvatar" class="pauseLeft" href="https://s3-us-west-2.amazonaws.com/s.cdpn.io/4273/walk-sequence.svg" x="0" y="12" width="320px" height="60px" />
-                    </svg>
+                        <image id="playerAvatar" 
+                        ref={avatarImgRef}
+                        // class= {animateAvatar(worldData.player.currentAnimation)}
+                        class="pauseLeft"
+                         href="https://s3-us-west-2.amazonaws.com/s.cdpn.io/4273/walk-sequence.svg" x="0" y="12" width="320px" height="60px" />
+                    </AvatarStyles>
                 </svg>
             </div>
         </body>

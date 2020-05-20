@@ -61,24 +61,24 @@ var RENDER_FPS = 30;
 
 
 // // idea: past present future / backstory objectives prophecy
-// var platPositions = [
-//   [5,480,1000,5,      0,   null ],
+var platPositions = [
+  [5,480,1000,5,      0,   null ],
 
-//   [50,280,100,20,     1,   {"doorName": "About Me", "doorLink": "aboutMe.html"} ], 
-//   [50,390,100,20,     0,   null ],
+  [50,280,100,20,     1,   {"doorName": "About Me", "doorLink": "aboutMe.html"} ], 
+  [50,390,100,20,     0,   null ],
 
-//   [250,340,100,20,    0,   null ],
+  [250,340,100,20,    0,   null ],
 
-//   [350,310,100,20,    0,   null ],
-//   [350,390,100,20,    0,   null ],
+  [350,310,100,20,    0,   null ],
+  [350,390,100,20,    0,   null ],
   
-//   [500,310,100,20,    0,   null ],
-//   [500,430,100,20,    1,   {"doorName": "Projects", "doorLink": "http://www.w3schools.com"} ],
+  [500,310,100,20,    0,   null ],
+  [500,430,100,20,    1,   {"doorName": "Projects", "doorLink": "http://www.w3schools.com"} ],
   
-//   [650,350,100,20,    0,   null ],
-//   [650,430,100,20,    0,   null ],
+  [650,350,100,20,    0,   null ],
+  [650,430,100,20,    0,   null ],
   
-// ]
+]
 
 var height = 500, //determines how many pixels away from the top of the screen is our baseline where the box will lie at rest/ y=0
     width = 1300, //width of screen //"9vw"
@@ -87,7 +87,8 @@ var height = 500, //determines how many pixels away from the top of the screen i
     //height -playerHeight = pixels between the bottom of the box and the green base line
     playerWidth = 40;
 
-    var speed = 5;
+    var MAX_SPEED = 4;
+    var speed = 0;
 
 
     //this is originally how the size was set but now it's in the css style sheet
@@ -126,11 +127,13 @@ var worldData = {
     "player": {
       "x" : Math.floor(width / 2) - Math.floor(playerWidth / 2),
       "y" : 8, //height - playerHeight
-      "fallingSpeed": 30,
-      "currentDir": null,
+      "fallingSpeed": 5,
+      "currentDir": "LEFT",
       "jumpDisplacement": 1,
       "playerFacing":"left",
-      "currentAnimation": "walkLeft"
+      "currentAnimation": "walkLeft",
+      "maxProjectedJumpY": 0,
+      "grounded": true
     },
     // Stores the current held keys. Can be inspected.
     "keysDown": ["sdf"]
@@ -150,37 +153,45 @@ function Game() {//must be capitalized
         window.addEventListener('keydown', handleKeyDown, false);
         window.addEventListener('keyup', handleKeyUp, false);
         setInterval((callback)=>{
+            // console.log( "Accepted Projection : " + worldData.player.maxProjectedJumpY);
 
-            moveAvatar();
+            // moveAvatar();
             //console\.log\(([^)]+)\)
             //console\.log\(([^)]+)\)
-            worldData.player.y +=speed;
+            // worldData.player.y +=speed;
+
+            checkForPlatform (worldData.player.x, worldData.player.y)
+
+            //console\.log\(([^)]+)\) console.log("GROUNDEDED!!!!!!!!!!!!!!!!!")
+            if (worldData.player.currentDir == "RIGHT"){
+                worldData.player.x += speed;
+                moveAvatar("RELOCATE_X", worldData.player.x, null)
+                if (speed != 0 ){
+                    speed -=1  //to slide at the end of his walk [later distringuish between falling and walking]
+                }
+            }
+            else if (worldData.player.currentDir == "LEFT"){
+                worldData.player.x -= speed;
+                moveAvatar("RELOCATE_X", worldData.player.x, null)
+                if (speed != 0){
+                    speed -=1 //to slide at the end of his walk
+                }
+            }
             
             if (isKeyDown("ArrowRight")){
                 //console\.log\(([^)]+)\)
+                speed = MAX_SPEED;
                 worldData.player.x +=speed;
                 moveAvatar("RELOCATE_X", worldData.player.x, null)
                 worldData.player.currentDir = "RIGHT";
                 updateAnimation("walkRight");
                 // avatarRef.current.setAttribute("class", "walkRight" )
                 changeAnimation("walkRight");
-                // console.log("class: " + avatarRef.current.classList )
-                // avatarImgRef.current.classList = ""
-                // avatarImgRef.current.classList.add('walkRight');
-
-                
-                // avatarRef.current.classList.remove('pauseLeft');
-                // //console\.log\(([^)]+)\)
-                // avatarRef.current.className = "walkRight"; 
-                // setX(x + speed);
-                // currentDir = "RIGHT"; //registers that you moved right last time
-                // applySpriteChange();
-
-                // document.getElementById("playerAvatar").classList="";
-                // document.getElementById("playerAvatar").classList.add("walkRight");
+   
             }
             else if (isKeyDown("ArrowLeft")){
                 //console\.log\(([^)]+)\)
+                speed = MAX_SPEED;
                 worldData.player.x -=speed;
                 moveAvatar("RELOCATE_X", worldData.player.x, null)
                 worldData.player.currentDir = "LEFT";
@@ -188,22 +199,37 @@ function Game() {//must be capitalized
                 // updateAnimation("walkLeft");
                 changeAnimation("walkLeft");
             }
-            if (isKeyDown("ArrowUp")){
-                //console\.log\(([^)]+)\)
-                if(worldData.player.fallingSpeed>=0){
-                    worldData.player.fallingSpeed -=8;
-                }
-                moveAvatar("RELOCATE_Y", null , worldData.player.y);
-                // setX(x + speed);
-                // currentDir = "RIGHT"; //registers that you moved right last time
-                // applySpriteChange();
+            // if (isKeyDown("ArrowUp") && worldData.player.fallingSpeed === 0 /*&& height - worldData.player.y === playerHeight*/ ){
+            //     //console\.log\(([^)]+)\)
+            //     console.log( "higher?: "+ (worldData.playermaxProjectedJumpY > worldData.player.y)  + "   proj:" +  worldData.player.maxProjectedJumpY + "     actual: " + worldData.player.y + "   grounded: " + worldData.player.grounded)
+            //     const wdp = worldData.player;
+            //     const gnd = worldData.player.grounded
+            //     if (wdp.grounded){
+            //         console.log( "Projection : " + (parseInt(wdp.y) - (basePlayerHeight*1.1)) );
+            //         worldData.player.maxProjectedJumpY = (parseInt(wdp.y) - (parseInt(basePlayerHeight)));
+            //         console.log( "Accepted Projection : " + worldData.player.maxProjectedJumpY);
+            //         worldData.player.grounded = false;
+            //     }
+            //     // else if (wdp.fallingSpeed == 0){
+            //     //     worldData.player.grounded = true; //later this condition will be more exact by setting it in the platform recognition cycles so it can't be flawed
+            //     // }
+            //     console.log( "-----higher?: "+ (wdp.maxProjectedJumpY > wdp.y)  + "   proj:" +  wdp.maxProjectedJumpY + "     actual: " + wdp.y + "   grounded: " + worldData.player.grounded)
+            //     if(gnd /*worldData.player.fallingSpeed>=0*/){
+            //         console.log("validated")
+            //         worldData.player.fallingSpeed -=8;
+            //     }
+            //     moveAvatar("RELOCATE_Y", null , worldData.player.y);
+            //     console.log( "Accepted Projection 222: " + worldData.player.maxProjectedJumpY);
+            //     // setX(x + speed);
+            //     // currentDir = "RIGHT"; //registers that you moved right last time
+            //     // applySpriteChange();
 
-                // document.getElementById("playerAvatar").classList="";
-                // document.getElementById("playerAvatar").classList.add("walkRight");
-            }
+            //     // document.getElementById("playerAvatar").classList="";
+            //     // document.getElementById("playerAvatar").classList.add("walkRight");
+            // }
 
             if (!isKeyDown("ArrowLeft") && !isKeyDown("ArrowRight") && !isKeyDown("ArrowUp" )) {
-                console.log ("WE SHOULD BE STANDING!!")
+                // console.log ("WE SHOULD BE STANDING!!")
                 if (worldData.player.currentDir == "LEFT"){
                     changeAnimation("pauseLeft");
                 }
@@ -214,81 +240,55 @@ function Game() {//must be capitalized
 
 
 
-            if (y>=height-basePlayerHeight){
-                //console\.log\(([^)]+)\)
-                worldData.player.fallingSpeed =0;
-                // setFallingSpeed(0)
-                moveAvatar("RELOCATE_Y", null, height-basePlayerHeight );
-            }
-            else{
+            // if (y>=height-basePlayerHeight){
+            //     //console\.log\(([^)]+)\)
+            //     worldData.player.fallingSpeed =0;
+            //     // setFallingSpeed(0)
+            //     moveAvatar("RELOCATE_Y", null, height-basePlayerHeight );
+            // }
+            // else{
                 // The player is falling
-                //console\.log\(([^)]+)\)
-                worldData.player.y += worldData.player.fallingSpeed;
-                worldData.player.fallingSpeed += 1;
-                moveAvatar("RELOCATE_Y", null , worldData.player.y);
-                // setY(y+fallingSpeed)
-                // setFallingSpeed(fallingSpeed+1)
-            }
-            // const fireKeyAction =(key, isDown)=>{
-            //     // Only trigger Arrow keys.
-    
-            //     // //console\.log\(([^)]+)\) + (parseInt(avatarRef.current.getAttribute("x"))+1) );
-            //     // avatarRef.current.setAttribute("x", (parseInt(avatarRef.current.getAttribute("x"))+1)    )
-            //     var keysDown = worldData.keysDown;
             //     //console\.log\(([^)]+)\)
-            //     //console\.log\(([^)]+)\)
-            //     switch(key){
-            //         case "ArrowLeft":
-            //         case "ArrowRight":
-            //         case "ArrowUp":
-            //         case "ArrowDown":
-            //         case SpaceBar:
-            //             if (isDown) {
-            //                 // Only add the key if it's not already in the list.
-            //                 if (keysDown.indexOf(key) === -1) {
-            //                     keysDown.push(key);
-            //                 }
-            //             } else {
-            //                 keysDown.splice(keysDown.indexOf(key), 1);
-            //             };
-            //     }
-            // }
-            // const handleKeyDown = (e) => {
-            //     //console\.log\(([^)]+)\)
-            //     var key = e.key;
-            //     fireKeyAction(key, true)
-            // }
-            // const handleKeyUp = (e) => {
-            //     var key = e.key;
-            //     fireKeyAction(key, false)
-            // }
-            // window.addEventListener('keydown', handleKeyDown, false);
-            // window.addEventListener('keyup', handleKeyUp, false);
+            //     worldData.player.y += worldData.player.fallingSpeed;
+            //     worldData.player.fallingSpeed += 1;
+            //     moveAvatar("RELOCATE_Y", null , worldData.player.y);
+            //     // setY(y+fallingSpeed)
+            //     // setFallingSpeed(fallingSpeed+1)
+            // // }
+           
 
-            // don't forget to delisten to these two handlers
-            if (height - worldData.player.y <= playerHeight && worldData.player.fallingSpeed >= 0){
-                worldData.player.y = height - playerHeight;
-                worldData.player.fallingSpeed = 0;
-            } 
-            else {
-                // The player is falling
-                worldData.player.y += worldData.player.fallingSpeed;
-                worldData.player.fallingSpeed += .5;
-                // worldData.player.y += 1;
-              
-                if (worldData.player.currentDir === "left") {
-                    worldData.player.x -= worldData.player.jumpDisplacement;          //if you were heading left midair, keep heading left
-                    //worldData.player.x -= speed *.5;
-                    //worldData.player.currentDir = null;
-                }
-                if (worldData.player.currentDir === "right") {
-                  worldData.player.x += worldData.player.jumpDisplacement;
-                    //if you were heading right midair, keep heading right
-                    //worldData.player.x += speed *.5;
-                }  
-            }
+    // Adding gravity
+    if (height - worldData.player.y <= playerHeight && worldData.player.fallingSpeed >= 0){
+        worldData.player.y = height - playerHeight;
+        worldData.player.fallingSpeed = 0;
+    } 
+
+    else {
+        // The player is falling
+        worldData.player.y += worldData.player.fallingSpeed;
+        worldData.player.fallingSpeed += .5;
+        // worldData.player.y += 1;
+      
+        // if (worldData.player.currentDir === "LEFT") {
+        //     worldData.player.x -= speed;          //if you were heading left midair, keep heading left
+        //     //worldData.player.x -= speed *.5;
+        //     //worldData.player.currentDir = null;
+        // }
+        // if (worldData.player.currentDir === "RIGHT") {
+        //   worldData.player.x += speed;
+        //     //if you were heading right midair, keep heading right
+        //     //worldData.player.x += speed *.5;
+        // }  
+    }
           
+    if (isKeyDown("ArrowUp") && worldData.player.fallingSpeed === 0 && height - worldData.player.y === playerHeight){
+        worldData.player.fallingSpeed = -8;
+        document.getElementById("player").classList.add("player-walking");
+    }
 
+    moveAvatar( "RELOCATE_Y", null,worldData.player.y )
+
+            // console.log( "Accepted Projection : " + worldData.player.maxProjectedJumpY);
         },30);
     });
 
@@ -452,6 +452,84 @@ function Game() {//must be capitalized
     // moveAvatar("RELOCATE_Y", null, 400)
     
 
+    function accessDoor (doorNum, xVal, yVal){
+        //console\.log\(([^)]+)\) console.log("GROUNDEDED!!!!!!!!!!!!!!!!!")
+        //console\.log\(([^)]+)\) console.log("GROUNDEDED!!!!!!!!!!!!!!!!!")
+        //console\.log\(([^)]+)\) console.log("GROUNDEDED!!!!!!!!!!!!!!!!!")
+        var doorID= "d"+doorNum
+        if (platPositions[doorNum][5] != null && platPositions[doorNum][4]==1){
+            //console\.log\(([^)]+)\) console.log("GROUNDEDED!!!!!!!!!!!!!!!!!")
+            var currDoor = document.getElementById(doorID)
+            //console\.log\(([^)]+)\) console.log("GROUNDEDED!!!!!!!!!!!!!!!!!")))
+            //console\.log\(([^)]+)\) console.log("GROUNDEDED!!!!!!!!!!!!!!!!!")
+            var doorXVal = eval(currDoor.getAttribute("dx"));
+            var doorYVal = eval(currDoor.getAttribute("dy"));
+      
+            //console\.log\(([^)]+)\) console.log("GROUNDEDED!!!!!!!!!!!!!!!!!")
+            //console\.log\(([^)]+)\) console.log("GROUNDEDED!!!!!!!!!!!!!!!!!"))+ doorXVal );
+            if (      xVal <= (parseInt(currDoor.getAttribute("width"))+doorXVal )  
+                  &&  xVal >= doorXVal-playerWidth  
+                  &&  yVal <= (parseInt(currDoor.getAttribute("height"))+doorYVal )  
+                  &&  yVal >= doorYVal-(basePlayerHeight)
+                  && !(worldData.player.fallingSpeed == 0 && platPositions[doorNum][4]==0)
+                  
+                ){
+                currDoor.style.fill='yellow'
+                if(isKeyDown(SpaceBar)){
+                    window.location.href =  platPositions[doorNum][5]["doorLink"]//"http://www.w3schools.com";
+                }
+            }
+            else{
+                currDoor.style.fill='purple'
+            }
+        }
+        else{
+          currDoor.style.fill='purple'
+        }
+      }
+
+
+    function checkForPlatform (xVal, yVal){
+        var cred = false;
+        var currPlat;
+        for (var i=0;i<platPositions.length;i+=1){
+        // for (i=0;i<platPos.length;i+=4){
+          
+    
+            // if (yVal<=(platPositions[i][1]-basePlayerHeight) && yVal> (platPositions[i][1] -(1.5*basePlayerHeight)) && (xVal >=(platPositions[i][0]-playerWidth)) && (xVal <=(platPositions[i][0] + platPositions[i][2]))   ) {
+            if (yVal<=(platPositions[i][1]-basePlayerHeight) && (xVal >=(platPositions[i][0]-playerWidth)) && (xVal <=(platPositions[i][0] + platPositions[i][2]))   ) {
+                //console\.log\(([^)]+)\) console.log("GROUNDEDED!!!!!!!!!!!!!!!!!")
+                //console\.log\(([^)]+)\) console.log("GROUNDEDED!!!!!!!!!!!!!!!!!")
+                if (platPositions[i][4]===1 && platPositions[i][5]!==null ){
+                    
+                    accessDoor(i, xVal, yVal);
+                    //console\.log\(([^)]+)\) console.log("GROUNDEDED!!!!!!!!!!!!!!!!!")
+                }
+                else if (platPositions[i][5]!==null ){
+                    document.getElementById("d"+i).style.fill='purple'
+                }
+                if ( yVal> (platPositions[i][1] -(1.5*basePlayerHeight)) ){
+                //console\.log\(([^)]+)\) console.log("GROUNDEDED!!!!!!!!!!!!!!!!!")
+                // worldData.player.fallingSpeed =0;
+                // worldData.player.y = platPositions[i][1];
+                // worldData.player.grounded =true;
+                playerHeight = basePlayerHeight + height-platPositions[i][1] ;
+                // moveAvatar("RELOCATE_Y", null , worldData.player.y);
+                console.log("GROUNDEDED!!!!!!!!!!!!!!!!!")
+                return true;   //chance that the charater will phase through a platform that is directly above another if we remove this
+                }
+            }
+            else if (yVal==(platPositions[i][1]-basePlayerHeight)  && ( (xVal < (platPositions[i][0]-playerWidth)) || (xVal >(platPositions[i][0] + platPositions[i][2])) ) ){
+                //console\.log\(([^)]+)\) console.log("GROUNDEDED!!!!!!!!!!!!!!!!!")
+                playerHeight =5; //set to ground???
+                // if (!worldData.player.grounded){
+                    worldData.player.fallingSpeed += .5;
+                // }
+            }
+        } 
+        console.log ("x= "+xVal+ "          y="+ yVal);
+    }
+    
  
 
     // constructor() {

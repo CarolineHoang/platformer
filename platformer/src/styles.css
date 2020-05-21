@@ -179,3 +179,69 @@
     85.71% {x: 240;}
     100% {x: 280;} */
   }
+
+
+  /* specific to tooltips that sit above what it points at: */
+  .tooltips .tooltiptext-top {
+    visibility: hidden;
+    min-width: 140px;
+    /* padding: 0 6px 0 6px; */
+    background-color: #555;
+    color: #fff;
+    text-align: center;
+    border-radius: 6px;
+    padding: 5px 3px;  /* <top&bottom> <right&left> */
+    position: absolute;
+    z-index: 1;
+    bottom: 125%; /* more positive = higher on the page */
+    left: 50%;
+    margin-left: -70px; /* neg half of min-width */
+    opacity: 0;
+    transition: opacity 0.3s;
+    }
+    .tooltips .tooltiptext-top::after { /*handle arrow*/
+    content: "";
+    position: absolute;
+    top: 100%; /* Triangle positioned at the bottom of the tooltip */
+    left: 50%;
+    margin-left: -5px; 
+    border-width: 5px;
+    border-style: solid;
+    border-color: #555 transparent transparent transparent;   /*     <color>  transparent transparent transparent  : make a triangle that points down   v     */
+    }
+    .tooltips:hover .tooltiptext-top {
+    visibility: visible;
+    opacity: 1;
+    }   
+/* specific to tooltips that sit below what it points at: */
+    .tooltips .tooltiptext-bottom {
+    visibility: hidden;
+    width: 120px;
+    background-color: #555;
+    color: #fff;
+    text-align: center;
+    border-radius: 6px;
+    padding: 5px 0;
+    position: absolute;
+    z-index: 1;
+    top:125%; /*must be top so that we don't move the arrow down as well */
+    /*bottom: -125%;*/  /* more negative = lower on the page */
+    left: 50%;
+    margin-left: -60px;
+    opacity: 0;
+    transition: opacity 0.3s;
+    }
+    .tooltips .tooltiptext-bottom::after {  /*handle arrow*/
+    content: "";
+    position: absolute;
+    bottom: 100%; /* Triangle positioned at the top of the tooltip : ^ */
+    left: 50%;
+    margin-left: -5px;
+    border-width: 5px;
+    border-style: solid;
+    border-color:  transparent transparent #555 transparent;  /*     transparent transparent  <color>  transparent  : make a triangle that points up   ^     */
+    }
+    .tooltips:hover .tooltiptext-bottom {
+    visibility: visible;
+    opacity: 1;
+    }   

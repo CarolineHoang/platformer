@@ -62,7 +62,7 @@ var RENDER_FPS = 30;
 
 // // idea: past present future / backstory objectives prophecy
 var platPositions = [
-  [5,480,1000,5,      0,   null ],
+  [5,480,1300,5,      0,   null ],
 
   [50,280,100,20,     1,   {"doorName": "About Me", "doorLink": "aboutMe.html"} ], 
   [50,390,100,20,     0,   null ],
@@ -180,53 +180,36 @@ function Game() {//must be capitalized
             
             if (isKeyDown("ArrowRight")){
                 //console\.log\(([^)]+)\)
-                speed = MAX_SPEED;
-                worldData.player.x +=speed;
-                moveAvatar("RELOCATE_X", worldData.player.x, null)
-                worldData.player.currentDir = "RIGHT";
-                updateAnimation("walkRight");
-                // avatarRef.current.setAttribute("class", "walkRight" )
-                changeAnimation("walkRight");
-   
+                if (worldData.player.x>=width-playerWidth){
+                    worldData.player.x=width-playerWidth
+                    moveAvatar("RELOCATE_X", worldData.player.x, null)
+                }
+                else{
+                    speed = MAX_SPEED;
+                    worldData.player.x +=speed;
+                    moveAvatar("RELOCATE_X", worldData.player.x, null)
+                    worldData.player.currentDir = "RIGHT";
+                    updateAnimation("walkRight");
+                    // avatarRef.current.setAttribute("class", "walkRight" )
+                    changeAnimation("walkRight");
+                }
             }
             else if (isKeyDown("ArrowLeft")){
                 //console\.log\(([^)]+)\)
-                speed = MAX_SPEED;
-                worldData.player.x -=speed;
-                moveAvatar("RELOCATE_X", worldData.player.x, null)
-                worldData.player.currentDir = "LEFT";
-                addClass("hi");
-                // updateAnimation("walkLeft");
-                changeAnimation("walkLeft");
+                if (worldData.player.x<=0){
+                    worldData.player.x=0
+                    moveAvatar("RELOCATE_X", worldData.player.x, null)
+                }
+                else{
+                    speed = MAX_SPEED;
+                    worldData.player.x -=speed;
+                    moveAvatar("RELOCATE_X", worldData.player.x, null)
+                    worldData.player.currentDir = "LEFT";
+                    addClass("hi");
+                    // updateAnimation("walkLeft");
+                    changeAnimation("walkLeft");
+                }
             }
-            // if (isKeyDown("ArrowUp") && worldData.player.fallingSpeed === 0 /*&& height - worldData.player.y === playerHeight*/ ){
-            //     //console\.log\(([^)]+)\)
-            //     console.log( "higher?: "+ (worldData.playermaxProjectedJumpY > worldData.player.y)  + "   proj:" +  worldData.player.maxProjectedJumpY + "     actual: " + worldData.player.y + "   grounded: " + worldData.player.grounded)
-            //     const wdp = worldData.player;
-            //     const gnd = worldData.player.grounded
-            //     if (wdp.grounded){
-            //         console.log( "Projection : " + (parseInt(wdp.y) - (basePlayerHeight*1.1)) );
-            //         worldData.player.maxProjectedJumpY = (parseInt(wdp.y) - (parseInt(basePlayerHeight)));
-            //         console.log( "Accepted Projection : " + worldData.player.maxProjectedJumpY);
-            //         worldData.player.grounded = false;
-            //     }
-            //     // else if (wdp.fallingSpeed == 0){
-            //     //     worldData.player.grounded = true; //later this condition will be more exact by setting it in the platform recognition cycles so it can't be flawed
-            //     // }
-            //     console.log( "-----higher?: "+ (wdp.maxProjectedJumpY > wdp.y)  + "   proj:" +  wdp.maxProjectedJumpY + "     actual: " + wdp.y + "   grounded: " + worldData.player.grounded)
-            //     if(gnd /*worldData.player.fallingSpeed>=0*/){
-            //         console.log("validated")
-            //         worldData.player.fallingSpeed -=8;
-            //     }
-            //     moveAvatar("RELOCATE_Y", null , worldData.player.y);
-            //     console.log( "Accepted Projection 222: " + worldData.player.maxProjectedJumpY);
-            //     // setX(x + speed);
-            //     // currentDir = "RIGHT"; //registers that you moved right last time
-            //     // applySpriteChange();
-
-            //     // document.getElementById("playerAvatar").classList="";
-            //     // document.getElementById("playerAvatar").classList.add("walkRight");
-            // }
 
             if (!isKeyDown("ArrowLeft") && !isKeyDown("ArrowRight") && !isKeyDown("ArrowUp" )) {
                 // console.log ("WE SHOULD BE STANDING!!")
@@ -238,23 +221,6 @@ function Game() {//must be capitalized
                 }
             }
 
-
-
-            // if (y>=height-basePlayerHeight){
-            //     //console\.log\(([^)]+)\)
-            //     worldData.player.fallingSpeed =0;
-            //     // setFallingSpeed(0)
-            //     moveAvatar("RELOCATE_Y", null, height-basePlayerHeight );
-            // }
-            // else{
-                // The player is falling
-            //     //console\.log\(([^)]+)\)
-            //     worldData.player.y += worldData.player.fallingSpeed;
-            //     worldData.player.fallingSpeed += 1;
-            //     moveAvatar("RELOCATE_Y", null , worldData.player.y);
-            //     // setY(y+fallingSpeed)
-            //     // setFallingSpeed(fallingSpeed+1)
-            // // }
            
 
     // Adding gravity
@@ -267,18 +233,6 @@ function Game() {//must be capitalized
         // The player is falling
         worldData.player.y += worldData.player.fallingSpeed;
         worldData.player.fallingSpeed += .5;
-        // worldData.player.y += 1;
-      
-        // if (worldData.player.currentDir === "LEFT") {
-        //     worldData.player.x -= speed;          //if you were heading left midair, keep heading left
-        //     //worldData.player.x -= speed *.5;
-        //     //worldData.player.currentDir = null;
-        // }
-        // if (worldData.player.currentDir === "RIGHT") {
-        //   worldData.player.x += speed;
-        //     //if you were heading right midair, keep heading right
-        //     //worldData.player.x += speed *.5;
-        // }  
     }
           
     if (isKeyDown("ArrowUp") && worldData.player.fallingSpeed === 0 && height - worldData.player.y === playerHeight){
@@ -287,30 +241,15 @@ function Game() {//must be capitalized
     }
 
     moveAvatar( "RELOCATE_Y", null,worldData.player.y )
-
-            // console.log( "Accepted Projection : " + worldData.player.maxProjectedJumpY);
         },30);
     });
 
 
         const isKeyDown = (keyName)=>{
-            //console\.log\(([^)]+)\)
-            //console\.log\(([^)]+)\)
-            // //console\.log\(([^)]+)\) + "Firse arr val:" + keysDown[0])
-            //console\.log\(([^)]+)\) + "Firse arr val:" + worldData.keysDown[0])
             return worldData.keysDown.indexOf(keyName) !== -1
         }   
-
-                    //if key is down, add to array of active keys
-                     //if key is released, remove from active keys
         const fireKeyAction =(key, isDown)=>{
-            // Only trigger Arrow keys.
-
-            // //console\.log\(([^)]+)\) + (parseInt(avatarRef.current.getAttribute("x"))+1) );
-            // avatarRef.current.setAttribute("x", (parseInt(avatarRef.current.getAttribute("x"))+1)    )
             var keysDown = worldData.keysDown;
-            //console\.log\(([^)]+)\)
-            //console\.log\(([^)]+)\)
             switch(key){
                 case "ArrowLeft":
                 case "ArrowRight":
@@ -318,11 +257,7 @@ function Game() {//must be capitalized
                 case "ArrowDown":
                 case SpaceBar:
                     if (isDown) {
-                        // Only add the key if it's not already in the list.
                         if (keysDown.indexOf(key) === -1) {
-                            //console\.log\(([^)]+)\)
-                            // //console\.log\(([^)]+)\)
-                            // //console\.log\(([^)]+)\)
                             worldData.keysDown.push(key);
                         }
                     } else {
@@ -331,7 +266,6 @@ function Game() {//must be capitalized
             }
         }
         const handleKeyDown = (e) => {
-            //console\.log\(([^)]+)\)
             var key = e.key;
             fireKeyAction(key, true)
         }
@@ -343,46 +277,7 @@ function Game() {//must be capitalized
             avatarRef.current.classList="";
             avatarRef.current.classList.add("walkLeft");
         }   
-        //don't forget to delisten to these two handlers
-    // useEffect(()=>{  //if key is down, add to array of active keys
-    //                  //if key is released, remove from active keys
-    //     const fireKeyAction =(key, isDown)=>{
-    //         // Only trigger Arrow keys.
-
-    //         // //console\.log\(([^)]+)\) + (parseInt(avatarRef.current.getAttribute("x"))+1) );
-    //         // avatarRef.current.setAttribute("x", (parseInt(avatarRef.current.getAttribute("x"))+1)    )
-    //         var keysDown = worldData.keysDown;
-    //         //console\.log\(([^)]+)\)
-    //         //console\.log\(([^)]+)\)
-    //         switch(key){
-    //             case "ArrowLeft":
-    //             case "ArrowRight":
-    //             case "ArrowUp":
-    //             case "ArrowDown":
-    //             case SpaceBar:
-    //                 if (isDown) {
-    //                     // Only add the key if it's not already in the list.
-    //                     if (keysDown.indexOf(key) === -1) {
-    //                         keysDown.push(key);
-    //                     }
-    //                 } else {
-    //                     keysDown.splice(keysDown.indexOf(key), 1);
-    //                 };
-    //         }
-    //     }
-    //     const handleKeyDown = (e) => {
-    //         //console\.log\(([^)]+)\)
-    //         var key = e.key;
-    //         fireKeyAction(key, true)
-    //     }
-    //     const handleKeyUp = (e) => {
-    //         var key = e.key;
-    //         fireKeyAction(key, false)
-    //     }
-    //     window.addEventListener('keydown', handleKeyDown, false);
-    //     window.addEventListener('keyup', handleKeyUp, false);
-    //     //don't forget to delisten to these two handlers
-    // });
+        
     useEffect(()=>{
         avatarRef.current.setAttribute("y", 400  )
     });
@@ -393,20 +288,12 @@ function Game() {//must be capitalized
         setY(e.target.value);
     } 
     function moveAvatar(command, xCoord, yCoord){
-        // const avatarRef = useRef(null);
-        // if (command != "stop"){
-        //     avatarRef.current.setAttribute("x", x )
-        //     avatarRef.current.setAttribute("y", y )
-        // }
         if (command == "RELOCATE_X"){
             avatarRef.current.setAttribute("x", xCoord )
         }
         if (command == "RELOCATE_Y"){
             avatarRef.current.setAttribute("y", yCoord )
         }
-
-
-        // avatarRef.current.setAttribute("x", (parseInt(avatarRef.current.getAttribute("x"))+1)    )
     }
 
     function updateAnimation(animation){
@@ -414,7 +301,6 @@ function Game() {//must be capitalized
     }
 
     function animateAvatar(animation){
-        //console\.log\(([^)]+)\)
         var ani = worldData.player.currentAnimation;
         switch(ani){
             case "pauseLeft":
@@ -442,31 +328,14 @@ function Game() {//must be capitalized
         }
         
     }
-    // function renderAvatar(){
-    //     render(return(
-
-    //     ))
-    // }
-
-
-    // moveAvatar("RELOCATE_Y", null, 400)
     
 
     function accessDoor (doorNum, xVal, yVal){
-        //console\.log\(([^)]+)\) console.log("GROUNDEDED!!!!!!!!!!!!!!!!!")
-        //console\.log\(([^)]+)\) console.log("GROUNDEDED!!!!!!!!!!!!!!!!!")
-        //console\.log\(([^)]+)\) console.log("GROUNDEDED!!!!!!!!!!!!!!!!!")
         var doorID= "d"+doorNum
         if (platPositions[doorNum][5] != null && platPositions[doorNum][4]==1){
-            //console\.log\(([^)]+)\) console.log("GROUNDEDED!!!!!!!!!!!!!!!!!")
             var currDoor = document.getElementById(doorID)
-            //console\.log\(([^)]+)\) console.log("GROUNDEDED!!!!!!!!!!!!!!!!!")))
-            //console\.log\(([^)]+)\) console.log("GROUNDEDED!!!!!!!!!!!!!!!!!")
             var doorXVal = eval(currDoor.getAttribute("dx"));
             var doorYVal = eval(currDoor.getAttribute("dy"));
-      
-            //console\.log\(([^)]+)\) console.log("GROUNDEDED!!!!!!!!!!!!!!!!!")
-            //console\.log\(([^)]+)\) console.log("GROUNDEDED!!!!!!!!!!!!!!!!!"))+ doorXVal );
             if (      xVal <= (parseInt(currDoor.getAttribute("width"))+doorXVal )  
                   &&  xVal >= doorXVal-playerWidth  
                   &&  yVal <= (parseInt(currDoor.getAttribute("height"))+doorYVal )  
@@ -498,12 +367,9 @@ function Game() {//must be capitalized
     
             // if (yVal<=(platPositions[i][1]-basePlayerHeight) && yVal> (platPositions[i][1] -(1.5*basePlayerHeight)) && (xVal >=(platPositions[i][0]-playerWidth)) && (xVal <=(platPositions[i][0] + platPositions[i][2]))   ) {
             if (yVal<=(platPositions[i][1]-basePlayerHeight) && (xVal >=(platPositions[i][0]-playerWidth)) && (xVal <=(platPositions[i][0] + platPositions[i][2]))   ) {
-                //console\.log\(([^)]+)\) console.log("GROUNDEDED!!!!!!!!!!!!!!!!!")
-                //console\.log\(([^)]+)\) console.log("GROUNDEDED!!!!!!!!!!!!!!!!!")
                 if (platPositions[i][4]===1 && platPositions[i][5]!==null ){
                     
                     accessDoor(i, xVal, yVal);
-                    //console\.log\(([^)]+)\) console.log("GROUNDEDED!!!!!!!!!!!!!!!!!")
                 }
                 else if (platPositions[i][5]!==null ){
                     document.getElementById("d"+i).style.fill='purple'
@@ -530,19 +396,7 @@ function Game() {//must be capitalized
         console.log ("x= "+xVal+ "          y="+ yVal);
     }
     
- 
 
-    // constructor() {
-    //   super();
-      
-    //   this.state = {
-    //     currentTab: 0
-
-    //   }
-    // }
-
-
-//   render(){
 
 
 
@@ -584,5 +438,4 @@ function Game() {//must be capitalized
         </body>
       );
 }
-// }
 export default Game;

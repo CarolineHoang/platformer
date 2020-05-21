@@ -85,36 +85,51 @@ class gameMap extends Component{
 
 
             {/* <!-- floor: --> */}
-            <rect   class= "platform"   id="0" rex="5"    y="480"  width="1000" height="5" />
+            
+            <rect   class= "platform"   id="0"      x="5"    y="480"  width="1300" height="5" />
 
             {/* <!-- platforms and doors (left to right, top to bottom in column)--> */}
             
 
             {/* <!-- <rect   class= "door"       id="d1"     x="50"    y="calc(280 - 70)"  width="70" height="70"   /> --> */}
-            <rect   class= "door"       id="d1"     x="calc(50 + (0.5 *100) - (0.5 * 70))"  dx="50 + (0.5 *100) - (0.5 * 70)"   y="calc(280 - 70)" dy="280 - 70"  width="70" height="70"   />
-            <rect   class= "platform"   id="1"      x="50"    y="280"  width="100" height="20" />
+            <svg>
+                <rect   class= "door"       id="d1"     x="calc(50 + (0.5 *100) - (0.5 * 70))"  dx="50 + (0.5 *100) - (0.5 * 70)"   y="calc(280 - 70)" dy="280 - 70"  width="70" height="70"   />
+            </svg>
+            <svg>
+                <rect   class= "platform"   id="1"      x="50"    y="280"  width="100" height="20" />
+            </svg>
+            <svg>
+                <rect   class= "platform"   id="2"      x="50"    y="390"  width="100" height="20" />
+            </svg>
+            <svg>
+                <rect   class= "platform"   id="3"      x="250"   y="340"  width="100" height="20" />
+            </svg>
+            <svg>
+                <rect   class= "platform"   id="4"      x="350"   y="310"  width="100" height="20" />
+            </svg>
+            <svg>
+                <rect   class= "platform"   id="5"      x="350"   y="390"  width="100" height="20" />
+            </svg>
 
-
-            <rect   class= "platform"   id="2"      x="50"    y="390"  width="100" height="20" />
-
-
-            <rect   class= "platform"   id="3"      x="250"   y="340"  width="100" height="20" />
-
-            
-            <rect   class= "platform"   id="4"      x="350"   y="310"  width="100" height="20" />
-            <rect   class= "platform"   id="5"      x="350"   y="390"  width="100" height="20" />
-
-
-            <image  class= "platform"   id="6"       x="500"   y="calc(310px - 25px)" width="100" height="50" href="https://raw.githubusercontent.com/CarolineHoang/platformerJS/19c63e90328416566bb401a642658b0b716ba3ae/platformersJS/groundEx.svg"/>
+            <svg>
+                <image  class= "platform"   id="6"       x="500"   y="calc(310px - 25px)" width="100" height="50" href="https://raw.githubusercontent.com/CarolineHoang/platformerJS/19c63e90328416566bb401a642658b0b716ba3ae/platformersJS/groundEx.svg"/>
+            </svg>
             {/* <!-- <rect class= "platform" id="1" x="500" y="310"  width="100" height="20" /> -->     */}
-
-            <rect   class= "door"       id="d7"     x="calc(500 + (0.5 *100) - (0.5 * 70)"  dx="500 + (0.5 *100) - (0.5 * 70)"  y="calc(430 - 70)"  dy="430 - 70"  width="70"  height="70"   />
-            <rect   class= "platform"   id="7"      x="500"   y="430"  width="100" height="20" />
-
-        
-            <rect   class= "platform"   id="8"      x="650"   y="350"  width="100" height="20" />
-            <rect   class= "platform"   id="9"      x="650"   y="430"  width="100" height="20" />
-
+            <svg>
+                <rect   class= "door"       id="d7"     x="calc(500 + (0.5 *100) - (0.5 * 70)"  dx="500 + (0.5 *100) - (0.5 * 70)"  y="calc(430 - 70)"  dy="430 - 70"  width="70"  height="70"   />
+                <svg   class= "tooltiptext-top" >
+                    <text x="50%"  y="calc(430 - 70 -40)" width="70" class="small">hello</text>
+                </svg>
+            </svg>
+            <svg>
+                <rect   class= "platform"   id="7"      x="500"   y="430"  width="100" height="20" />
+            </svg>
+            <svg>
+                <rect   class= "platform"   id="8"      x="650"   y="350"  width="100" height="20" />
+            </svg>
+            <svg>
+                <rect   class= "platform"   id="9"      x="650"   y="430"  width="100" height="20" />
+            </svg>
 
             
 

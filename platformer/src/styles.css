@@ -5,7 +5,9 @@
     fill: red;
   } 
   
-  
+  .yellow{
+    fill:yellow !important;
+  }
   .door{
     fill:purple;
     stroke:purple;
@@ -143,6 +145,22 @@
   }
   .pauseRight{
     transform: translate(-240px,0);
+  }
+
+  .leapLeft{
+    transform: scale(-1,1) translate(-160px,0);
+
+  }
+  .leapLeft1{
+    transform: scale(-1,1) translate(-200px,0);
+
+  }
+  .leapRight{
+    transform: translate(-120px,0);
+  }
+
+  .leapRight2{
+    transform: translate(-160px,0);
   }
   /* @keyframes walkingRight {
     0%   {x: 0;}

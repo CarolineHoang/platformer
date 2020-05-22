@@ -39,35 +39,137 @@ const AvatarStyles = styled.div`
     bottom: calc(-100% + 0vw);
 `;
 
+
+var platPositions = [];
+
 class gameMap extends Component{
 
-    constructor() {
-      super();
+    constructor(props) {
+      super(props);
       
       this.state = {
         currentTab: 0
+        
 
       };
+      this.turnOrange = this.turnOrange.bind(this);
+
+    //   platPositions = props.mapData;
+    //   this.turnOrange1 = this.turnOrange.bind(this);
 
       // for (var i = 1; i < this.props.length; i++){{
 
       // }
+    //   console.log("turnOrange function started");
+    }
+    turnOrange=(command, e)=>{
+        // console.log("ORANGE!! \n\n\n\n\ "+ e.target.id + " " + e.target.width);
+        // console.log(e.target.width);
+        // console.log(e.target.className);
+        // console.log(e.target.className.baseVal);
+        console.log("turnOrange function started");
+        if (command == "add"){
+        console.log(e.target.classList);
+        // e.target.classList += ""
+        e.target.classList.add("yellow")
+        // e.style.fill='yellow'
+        }
+        else if (command == "remove"){
+            e.target.classList= []
+            e.target.classList.add("door")
+        }
+
 
     }
+
+    turnOrange1=()=>{
+        // console.log("ORANGE!! \n\n\n\n\ "+ e.target.id + " " + e.target.width);
+        // console.log(e.target.width);
+        // console.log(e.target.className);
+        // console.log(e.target.className.baseVal);
+        console.log("turnOrange function started!!!!!");
+
+
+    }
+
+    generateDoor=(platInfo, idx)=>{
+        console.log("generateDoor function started!!!!!");
+        if (platInfo[4]){
+            return (
+                // <rect   class= "door"       id={"d"+idx}     x={"calc("+platInfo[0]+"(0.5*"+platInfo[2]+")-(0.5*"+"70"+"))"}  dx={""+platInfo[0]+"(0.5*"+platInfo[2]+")-(0.5*"+"70"+")"}  y={"calc("+platInfo[1]+"-"+"70"+")"} dy={platInfo[1]+"-"+"70"}  width="70" height="70"  onMouseOver={(e)=>this.turnOrange("add", e)} onMouseOut={(e)=>this.turnOrange("remove",e)} 
+                // // onClick={(e)=>this.redirect("/aboutMe",e)}
+                // />
+                // <rect   class= "door"       id="d1"     x="calc(50 + (0.5 *100) - (0.5 * 70))"  dx="50 + (0.5 *100) - (0.5 * 70)"   y="calc(280 - 70)" dy="280-70"  width="70" height="70"  onMouseOver={(e)=>this.turnOrange("add", e)} onMouseOut={(e)=>this.turnOrange("remove",e)} />
+                
+                // note: if we stay in React, we won't need the calc tag and can just process the calculation. Also, we don't need dx and dy
+                <rect   class= "door" id={"d"+idx}   x={"calc( "+platInfo[0]+" + ( 0.5 * "+platInfo[2]+" ) - ( 0.5 * "+platInfo[5]["doorWidth"]+" ))"} dx={platInfo[0]+" + ( 0.5 * "+platInfo[2]+" ) - ( 0.5 * "+platInfo[5]["doorWidth"]+" )"}   y={"calc( "+platInfo[1]+" - "+platInfo[5]["doorLength"]+" )"} dy={platInfo[1]+" - "+platInfo[5]["doorLength"]}  width={platInfo[5]["doorWidth"]} height={platInfo[5]["doorLength"]} />
+                // <rect   class= "door" id={"d"+idx}   x={"calc( "+platInfo[0]+" + ( 0.5 * "+platInfo[2]+" ) - ( 0.5 * "+"70"+" ))"} dx={platInfo[0]+"+( 0.5 * "+platInfo[2]+" ) - ( 0.5 * "+"70"+" )"}   y={"calc( "+platInfo[1]+" - "+"70"+" )"} dy={platInfo[1]+" - "+"70"}  width="70" height="70" />
+            )
+        }
+        else{
+            return
+        }
+
+
+    }
+
+    generatePlatform=(platInfo, idx)=>{
+        console.log("generatePlatform function started!!!!!");
+        return (
+            <rect   class= "platform"   id={idx}      x={platInfo[0]}    y={platInfo[1]}  width={platInfo[2]} height={platInfo[3]} />
+        )
+    }
+
+
+    generateMap=(platPositions)=>{
+        console.log("generateMap function started!!!!!");
+        console.log("platLen: " + platPositions.length);
+        console.log(platPositions);
+        return(
+            <svg>
+                {platPositions.map((platform, idx)=>{
+                    return (
+                        <svg>
+                            {this.generatePlatform(platform, idx)}
+                            {this.generateDoor(platform, idx)}
+                        </svg>
+                    )
+                })}
+            </svg>
+        )
+        // for (var i=0; i< platPositions.length; i++){
+        //     console.log("generateMap LOOP "+ i+" !!!!!");
+        //     this.generatePlatform(platPositions[i])
+        //     if (platPositions[i][4]){
+        //         this.generateDoor(platPositions[i])
+        //     }
+        // }
+        // console.log("generateMap END!!!!!");
+
+    }
+    // generateFloor=()=>{
+    //     console.log("generateRectangle function started!!!!!");
+    // }
+
 
     // fillCarusel(){
     //   return <CaruselItem>4</CaruselItem>;
 
     // }
 
+    // turnOrange1;
+    render(){
+        // console.log("turnOrange function started");
 
-  render(){
 
 
-
-      
+    
       return(
+
+
         <svg>
+            
+            {/* {this.turnOrange1()} */}
             <line x1="0" y1="400" x2="1000" y2="400" stroke="green" stroke-width="4" />
             <line x1="999" y1="500" x2="999" y2="0" stroke="red" stroke-width="4" />
             <line x1="0" y1="500" x2="100vw" y2="500" stroke="green" stroke-width="4" />
@@ -81,61 +183,9 @@ class gameMap extends Component{
             />
 
 
-        {/* <!-- <polygon points="200,10 250,190 160,210" style="fill:lime;stroke:purple;stroke-width:1" /> --> */}
-
-
-            {/* <!-- floor: --> */}
-            
-            <rect   class= "platform"   id="0"      x="5"    y="480"  width="1300" height="5" />
-
-            {/* <!-- platforms and doors (left to right, top to bottom in column)--> */}
-            
-
-            {/* <!-- <rect   class= "door"       id="d1"     x="50"    y="calc(280 - 70)"  width="70" height="70"   /> --> */}
-            <svg>
-                <rect   class= "door"       id="d1"     x="calc(50 + (0.5 *100) - (0.5 * 70))"  dx="50 + (0.5 *100) - (0.5 * 70)"   y="calc(280 - 70)" dy="280 - 70"  width="70" height="70"   />
-            </svg>
-            <svg>
-                <rect   class= "platform"   id="1"      x="50"    y="280"  width="100" height="20" />
-            </svg>
-            <svg>
-                <rect   class= "platform"   id="2"      x="50"    y="390"  width="100" height="20" />
-            </svg>
-            <svg>
-                <rect   class= "platform"   id="3"      x="250"   y="340"  width="100" height="20" />
-            </svg>
-            <svg>
-                <rect   class= "platform"   id="4"      x="350"   y="310"  width="100" height="20" />
-            </svg>
-            <svg>
-                <rect   class= "platform"   id="5"      x="350"   y="390"  width="100" height="20" />
-            </svg>
-
-            <svg>
-                <image  class= "platform"   id="6"       x="500"   y="calc(310px - 25px)" width="100" height="50" href="https://raw.githubusercontent.com/CarolineHoang/platformerJS/19c63e90328416566bb401a642658b0b716ba3ae/platformersJS/groundEx.svg"/>
-            </svg>
-            {/* <!-- <rect class= "platform" id="1" x="500" y="310"  width="100" height="20" /> -->     */}
-            <svg>
-                <rect   class= "door"       id="d7"     x="calc(500 + (0.5 *100) - (0.5 * 70)"  dx="500 + (0.5 *100) - (0.5 * 70)"  y="calc(430 - 70)"  dy="430 - 70"  width="70"  height="70"   />
-                <svg   class= "tooltiptext-top" >
-                    <text x="50%"  y="calc(430 - 70 -40)" width="70" class="small">hello</text>
-                </svg>
-            </svg>
-            <svg>
-                <rect   class= "platform"   id="7"      x="500"   y="430"  width="100" height="20" />
-            </svg>
-            <svg>
-                <rect   class= "platform"   id="8"      x="650"   y="350"  width="100" height="20" />
-            </svg>
-            <svg>
-                <rect   class= "platform"   id="9"      x="650"   y="430"  width="100" height="20" />
-            </svg>
 
             
-
-
-            
-            
+            {this.generateMap(this.props.mapData)}
 
             <svg width="200" height="100">
             <rect x="0" y="0" width="200" height="100" stroke="red" stroke-width="3px" fill="white"/>

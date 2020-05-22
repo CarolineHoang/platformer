@@ -5,6 +5,7 @@ import './App.css';
 import Avatar from './avatar.js';
 import Map from './map.js';
 import Game from './game.js'
+import MapSelect from './mapSelect.js'
 
 function App() {
   return (
@@ -24,7 +25,8 @@ function App() {
         </a>
       </header> */}
 
-      <Game/>
+      {/* <Game/> */}
+      <MapSelect></MapSelect>
       {/* <Map> */}
         {/* <Avatar/> */}
       {/* </Map> */}

@@ -90,6 +90,7 @@ var height = 500, //determines how many pixels away from the top of the screen i
     var MAX_SPEED = 4;
     var speed = 0;
 
+    var dropPoint =[null,null];
 
     //this is originally how the size was set but now it's in the css style sheet
 // screen.setAttribute("width", width);
@@ -123,10 +124,31 @@ var height = 500, //determines how many pixels away from the top of the screen i
 //   }
 //   update();
 
+
+var setStart = (dim , dp) => {
+    if (dp[0] == "dec"){
+        if (dim == "x" && (Math.floor(width * dp[1]) - Math.floor(playerWidth / 2))>0 ){
+            return Math.floor(width * dp[1]) - Math.floor(playerWidth / 2)
+        }
+        else if (dim == "y" && (Math.floor(height * dp[1]) - basePlayerHeight)>0 ){
+            return Math.floor(height * dp[1]) - basePlayerHeight;
+        }
+        else{
+            return 0;
+        }
+        
+    }
+    else if (dp[0] == "coord"){
+        return dp[1]
+    }
+}
+
+
+
 var worldData = {
     "player": {
-      "x" : Math.floor(width / 2) - Math.floor(playerWidth / 2),
-      "y" : 8, //height - playerHeight
+      "x" : dropPoint[0] ?  setStart("x", dropPoint[0]) : Math.floor(width / 2) - Math.floor(playerWidth / 2),
+      "y" : dropPoint[1] ?  setStart("y", dropPoint[1])  : 0, // 8, //height - playerHeight
       "fallingSpeed": 5,
       "currentDir": "LEFT",
       "jumpDisplacement": 1,
@@ -140,7 +162,7 @@ var worldData = {
   }
 
 
-function Game() {//must be capitalized
+function Game(props) {//must be capitalized
     const avatarRef = useRef(null);
     const avatarImgRef = useRef(null);
     const [ x, setX] = useState(0);
@@ -150,6 +172,11 @@ function Game() {//must be capitalized
     const [keysDown, setKeysDown ] = useState([]);
 
     useEffect(()=>{
+        platPositions = props.mapData;
+        dropPoint= props.dropPoint;
+        worldData.player.x = dropPoint[0] ?  setStart("x", dropPoint[0]) : Math.floor(width / 2) - Math.floor(playerWidth / 2)
+        worldData.player.y = dropPoint[1] ?  setStart("y", dropPoint[1])  : 0
+        
         window.addEventListener('keydown', handleKeyDown, false);
         window.addEventListener('keyup', handleKeyUp, false);
         setInterval((callback)=>{
@@ -180,6 +207,7 @@ function Game() {//must be capitalized
             
             if (isKeyDown("ArrowRight")){
                 //console\.log\(([^)]+)\)
+                //if you hit the right wall
                 if (worldData.player.x>=width-playerWidth){
                     worldData.player.x=width-playerWidth
                     moveAvatar("RELOCATE_X", worldData.player.x, null)
@@ -189,25 +217,40 @@ function Game() {//must be capitalized
                     worldData.player.x +=speed;
                     moveAvatar("RELOCATE_X", worldData.player.x, null)
                     worldData.player.currentDir = "RIGHT";
-                    updateAnimation("walkRight");
-                    // avatarRef.current.setAttribute("class", "walkRight" )
-                    changeAnimation("walkRight");
+                    //if you're jumping
+                    if (!worldData.player.grounded){
+                        changeAnimation("leapRight");
+                    }
+                    //if you're running
+                    else{
+                        // updateAnimation("walkRight");
+                        // avatarRef.current.setAttribute("class", "walkRight" )
+                        changeAnimation("walkRight");
+                    }
                 }
             }
+            //if you hit the left wall
             else if (isKeyDown("ArrowLeft")){
                 //console\.log\(([^)]+)\)
                 if (worldData.player.x<=0){
                     worldData.player.x=0
                     moveAvatar("RELOCATE_X", worldData.player.x, null)
                 }
+                //if you're jumping
+                //if you're running
                 else{
                     speed = MAX_SPEED;
                     worldData.player.x -=speed;
                     moveAvatar("RELOCATE_X", worldData.player.x, null)
                     worldData.player.currentDir = "LEFT";
                     addClass("hi");
-                    // updateAnimation("walkLeft");
-                    changeAnimation("walkLeft");
+                    if (!worldData.player.grounded){
+                        changeAnimation("leapLeft");
+                    }
+                    else{
+                        // updateAnimation("walkLeft");
+                        changeAnimation("walkLeft");
+                    }
                 }
             }
 
@@ -226,6 +269,7 @@ function Game() {//must be capitalized
     // Adding gravity
     if (height - worldData.player.y <= playerHeight && worldData.player.fallingSpeed >= 0){
         worldData.player.y = height - playerHeight;
+        worldData.player.grounded = true;
         worldData.player.fallingSpeed = 0;
     } 
 
@@ -237,7 +281,8 @@ function Game() {//must be capitalized
           
     if (isKeyDown("ArrowUp") && worldData.player.fallingSpeed === 0 && height - worldData.player.y === playerHeight){
         worldData.player.fallingSpeed = -8;
-        document.getElementById("player").classList.add("player-walking");
+        worldData.player.grounded = false;
+        // document.getElementById("player").classList.add("player-walking");
     }
 
     moveAvatar( "RELOCATE_Y", null,worldData.player.y )
@@ -320,6 +365,9 @@ function Game() {//must be capitalized
             case "pauseRight":
             case "walkLeft":
             case "walkRight":
+            case "leapRight":
+            case "leapLeft":
+
                 avatarImgRef.current.classList = "";
                 avatarImgRef.current.classList.add(animation);
                 break;
@@ -378,7 +426,6 @@ function Game() {//must be capitalized
                 //console\.log\(([^)]+)\) console.log("GROUNDEDED!!!!!!!!!!!!!!!!!")
                 // worldData.player.fallingSpeed =0;
                 // worldData.player.y = platPositions[i][1];
-                // worldData.player.grounded =true;
                 playerHeight = basePlayerHeight + height-platPositions[i][1] ;
                 // moveAvatar("RELOCATE_Y", null , worldData.player.y);
                 console.log("GROUNDEDED!!!!!!!!!!!!!!!!!")
@@ -417,7 +464,7 @@ function Game() {//must be capitalized
             <div class= "game">
                 <svg id="screen">
                     {/* <!-- rending background graphics:--------------------------------------> */}
-                    <GameMap></GameMap>
+                    <GameMap mapData={props.mapData} ></GameMap>
                     {/* <!-- viewBox="<xPos> <ypos> <width> <height>" -->
                     <!-- width!= viewbox to show that we "cut out the image to show with a width of only 40px" -->
                     <!-- height = viewbox becuase that is to the scale we originally set -->
@@ -425,14 +472,15 @@ function Game() {//must be capitalized
                     <AvatarStyles id="player"  
                     // moveX={x ? 0 : x} moveY={500 ? 0 : 500} 
                     ref={avatarRef}
-                    x="500" y="200" 
+                    // x="500" y="200" 
                     width="40px" height="63px" viewBox="0 0 320 63" preserveAspectRatio="xMinYMin slice">
                         <image id="playerAvatar" 
                         ref={avatarImgRef}
                         // class= {animateAvatar(worldData.player.currentAnimation)}
-                        class="pauseLeft"
-                         href="https://s3-us-west-2.amazonaws.com/s.cdpn.io/4273/walk-sequence.svg" x="0" y="12" width="320px" height="60px" />
+                        className="pauseLeft"
+                         href="https://raw.githubusercontent.com/CarolineHoang/react-platformer/master/platformer/src/svg/walk-sequence-ID-filledWhite.svg" x="0" y="12" width="320px" height="60px" />
                     </AvatarStyles>
+                    {/* original svg: https://s3-us-west-2.amazonaws.com/s.cdpn.io/4273/walk-sequence.svg */}
                 </svg>
             </div>
         </body>
